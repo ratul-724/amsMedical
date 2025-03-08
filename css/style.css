@@ -1,0 +1,95 @@
+main {
+    margin-left: 60px;
+    position: relative;
+    z-index: 1; 
+    min-height: calc(100vh - 76px); 
+    width: 100%;
+}
+#home{
+    margin-bottom: 100px;
+}
+.topBanner {
+    height: 200px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.topBanner img {
+    width: 100%;
+    height: 100%;
+}
+.form-container {
+    margin-top: 30px;
+}
+
+/* Add responsive styles */
+@media (max-width: 768px) {
+    .topBanner {
+        height: 150px;
+    }
+
+    .topBanner .text h1 {
+        font-size: 1.8rem;
+    }
+
+    .topBanner .text p {
+        font-size: 1rem;
+    }
+}
+
+
+
+
+/* user page css start here  */
+#loginAndRegister{
+    width: 100%;
+    display: flex;
+    margin-left: -50px;
+    padding: 50px 20px 50px 0px;
+    justify-content: center;
+    font-size: 13px;
+}
+#loginAndRegister form{
+    background-color: #d5f3b8;
+    padding: 30px;
+    border-radius: 10px;
+    width: 130%;
+}
+#loginAndRegister .signInBtn{
+    width: 100%;
+}
+#login{
+    margin: 0 50px;
+}
+#register{
+    display: none;
+    margin:0 70px;
+}
+#userList{
+    display: none;
+    width: 60%;
+    margin: auto;
+}
+@media (max-width: 768px) {
+    #loginAndRegister{
+        width: 100%;
+        display: flex;
+        /* margin-left: -50px; */
+        /* padding: 0px 20px 50px 0px; */
+        justify-content: center;
+        font-size: 13px;
+    }
+    #loginAndRegister form{
+        background-color: #d5f3b8;
+        padding: 20px;
+        border-radius: 10px;
+        margin-left: 60px;
+        /* margin-top: 60px; */
+        width: 100%;
+    }
+    #loginAndRegister{
+        flex-direction: column;
+    }
+    #register{
+        margin-top: 100px;
+    }
+}

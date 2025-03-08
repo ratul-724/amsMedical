@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <title>User Management</title>
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="index.html"><img src="media/logo.png" alt="logo" height="70px"></a></div>
+        <div class="header-icons">
+            <div class="user-icon"><a href="user.html"><img src="media/icons/user.png" alt="user" height="30px"></a></div>
+        </div>
+    </header>
+    <div class="fullBody">
+        <nav class="sidebar">
+            <ul>
+                <a href="index.html">
+                    <li class="menu-item">
+                        <img src="media/icons/home.png" alt="home" height="30px"> <span>Home</span>
+                    </li>
+                </a>
+                <a href="data.html">
+                    <li class="menu-item">
+                        <img src="media/icons/data.png" alt="data" height="30px"><span>Report</span>
+                    </li>
+                </a>
+                <a href="user.html">
+                    <li class="menu-item">
+                        <img src="media/icons/user.png" alt="user" height="30px"><span>User</span>
+                    </li>
+                </a>
+                <a href="#" id="logout">
+                    <li class="menu-item">
+                        <img src="media/icons/logout.png" alt="logout" height="32px"><span>Logout</span>
+                    </li>
+                </a>
+            </ul>
+        </nav>
+        <main>
+            <section id="loginAndRegister">
+                <div id="login">
+                    <form id="loginForm">
+                        <h2 class="text-center text-success fw-semibold pb-2">Sign In</h2>
+                        <div class="form-outline mb-4">
+                            <input type="text" id="loginAgentName" class="form-control" placeholder="Agent Name" required />
+                        </div>
+                        <div class="form-outline mb-4">
+                            <input type="password" id="loginPassword" class="form-control" placeholder="Password" required />
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block mb-4 signInBtn">Sign In</button>
+                    </form>
+                </div>
+                <div id="register" style="display: none;">
+                    <form id="registerForm">
+                        <h2 class="text-center text-success fw-semibold pb-2">Register User</h2>
+                        <div class="form-outline mb-4">
+                            <input type="text" id="registerAgentName" class="form-control" placeholder="Agent Name" required />
+                        </div>
+                        <div class="form-outline mb-4">
+                            <input type="password" id="registerPassword" class="form-control" placeholder="Password" required />
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block mb-4 w-100">Register</button>
+                    </form>
+                </div>
+                
+            </section>
+            <div id="userList">
+                <h2 class="text-center text-success fw-semibold pb-2">Registered Users</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Agent Name</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- User rows will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script src="js/user.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
