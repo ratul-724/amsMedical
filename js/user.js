@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     let users = JSON.parse(localStorage.getItem('users')) || [];
     console.log(users);
-
     // Ensure there is always at least one admin user
     if (!users.some(user => user.role === 'admin')) {
         users.push({ agentName: 'Alihossen', password: 'Ams@Admin@1234', role: 'admin' });
@@ -113,10 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = users[index];
 
         // Prevent editing of the logged-in admin user
-        if (loggedInUser && loggedInUser.agentName === user.agentName) {
-            alert('You cannot edit your own user details.');
-            return;
-        }
+        // if (loggedInUser && loggedInUser.agentName === user.agentName) {
+        //     alert('You cannot edit your own user details.');
+        //     return;
+        // }
 
         const newAgentName = prompt('Enter new agent name:', user.agentName);
         const newPassword = prompt('Enter new password:', user.password);

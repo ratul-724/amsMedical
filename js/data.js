@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderTable = () => {
         dataDisplay.innerHTML = '';
         const filteredData = loggedInUser.role === 'admin' ? formDataArray : formDataArray.filter(data => data.agent === loggedInUser.agentName);
-
         if (filteredData.length > 0) {
             const table = document.createElement('table');
             table.classList.add('table', 'table-bordered', 'table-striped');
@@ -82,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     renderTable();
-
 
     if (loggedInUser.role === 'admin') {
         document.getElementById('clearPage').addEventListener('click', () => {

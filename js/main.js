@@ -4,21 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     let formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
     const editIndex = localStorage.getItem('editIndex'); // Get edit index from localStorage
-
     // Clear any pre-filled values if you're not editing
     form.reset();
-
     if (!loggedInUser) {
         alert('You must be logged in to submit data.');
         window.location.href = 'user.html';
         return;
     }
-
     if (loggedInUser.role !== 'admin') {
         dataEntryForm.style.display = 'none';
         return;
     }
-
     // If editing, pre-fill form including the date field
     if (editIndex !== null) {
         const formData = formDataArray[Number(editIndex)];
@@ -37,13 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
     form.addEventListener('submit', (event) => {
         event.preventDefault();
-
         const formData = new FormData(form);
         const data = {};
-
         formData.forEach((value, key) => {
             if (key === 'date') {
                 // Convert "YYYY-MM-DD" back to "DD-MM-YYYY" format
@@ -53,14 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 data[key] = value;
             }
         });
-
         if (editIndex !== null) {
             formDataArray[Number(editIndex)] = data;
             localStorage.removeItem('editIndex'); // Clear edit mode after saving
         } else {
             formDataArray.push(data);
         }
-
         localStorage.setItem('formDataArray', JSON.stringify(formDataArray));
         window.location.href = 'data.html';
     });
