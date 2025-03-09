@@ -48,15 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const actionTd = document.createElement('td');
 
                     const editButton = document.createElement('button');
-                    editButton.textContent = 'Edit';
-                    editButton.classList.add('btn', 'btn-warning', 'btn-sm', 'me-2');
+                    editButton.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+                    editButton.classList.add('btn', 'btn-success', 'btn-sm', 'me-4');
                     editButton.addEventListener('click', () => {
                         localStorage.setItem('editIndex', index);
                         window.location.href = 'index.html';
                     });
 
                     const removeButton = document.createElement('button');
-                    removeButton.textContent = 'Remove';
+                    removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
                     removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
                     removeButton.addEventListener('click', () => {
                         formDataArray.splice(index, 1);

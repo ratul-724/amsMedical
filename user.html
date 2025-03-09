@@ -21,52 +21,56 @@
             <ul>
                 <a href="index.html">
                     <li class="menu-item">
-                        <img src="media/icons/home.png" alt="home" height="30px"> <span>Home</span>
+                        <i class="fa-solid fa-house" style="font-size: 24px;"></i> <span class="fw-semibold">Home</span>
                     </li>
                 </a>
                 <a href="data.html">
                     <li class="menu-item">
-                        <img src="media/icons/data.png" alt="data" height="30px"><span>Report</span>
+                        <i class="fa-solid fa-database" style="font-size: 26px;"></i><span class="fw-semibold">Report</span>
                     </li>
                 </a>
                 <a href="user.html">
                     <li class="menu-item">
-                        <img src="media/icons/user.png" alt="user" height="30px"><span>User</span>
+                        <i class="fa-solid fa-circle-user" style="font-size: 26px;"></i><span class="fw-semibold">User</span>
                     </li>
                 </a>
                 <a href="#" id="logout">
                     <li class="menu-item">
-                        <img src="media/icons/logout.png" alt="logout" height="32px"><span>Logout</span>
+                        <i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 26px;"></i><span class="fw-semibold">Logout</span>
                     </li>
                 </a>
             </ul>
         </nav>
         <main>
-            <section id="loginAndRegister">
-                <div id="login">
+            <section id="loginAndRegister" class="row">
+                <div id="login" class="col-10 col-md-5 my-5 m-auto">
                     <form id="loginForm">
                         <h2 class="text-center text-success fw-semibold pb-2">Sign In</h2>
-                        <div class="form-outline mb-4">
-                            <input type="text" id="loginAgentName" class="form-control" placeholder="Agent Name" required />
+                        <div class="form-outline mb-4 ">
+                            <input type="text" id="loginAgentName" class="form-control border-1 border-black rounded-5" placeholder="Agent Name" required />
                         </div>
                         <div class="form-outline mb-4">
-                            <input type="password" id="loginPassword" class="form-control" placeholder="Password" required />
-                            <span id="toggleLoginPassword" class="eye-icon" onclick="togglePasswordVisibility('loginPassword', 'toggleLoginPassword')"><i class="fa-solid fa-eye"></i></span>
+                            <div class="password-container w-100">
+                                <input type="password" id="loginPassword" class="rounded-5 border-1 border-black p-2 w-100" placeholder="Password">
+                                <i class="fas fa-eye" id="toggleLoginPassword" onclick="togglePasswordVisibility('loginPassword', 'toggleLoginPassword')"></i>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-success btn-block mb-4 signInBtn">Sign In</button>
+                        <button type="submit" class="btn btn-success btn-block mb-4 signInBtn"><i class="fa-solid fa-rocket"></i> Sign In</button>
                     </form>
                 </div>
-                <div id="register" style="display: none;">
+                <div id="register" class="col-10 col-md-5 my-5 m-auto" style="display: none;">
                     <form id="registerForm">
                         <h2 class="text-center text-success fw-semibold pb-2">Register User</h2>
                         <div class="form-outline mb-4">
-                            <input type="text" id="registerAgentName" class="form-control" placeholder="Agent Name" required />
+                            <input type="text" id="registerAgentName" class="form-control border-1 border-black rounded-5" placeholder="Agent Name" required />
                         </div>
                         <div class="form-outline mb-4">
-                            <input type="password" id="registerPassword" class="form-control" placeholder="Password" required />
-                            <span id="toggleRegisterPassword" class="eye-icon" onclick="togglePasswordVisibility('registerPassword', 'toggleRegisterPassword')"><i class="fa-solid fa-eye"></i></span>
+                            <div class="password-container w-100">
+                                <input type="password" class="rounded-5 border-1 border-black p-2 w-100" id="registerPassword" placeholder="Password">
+                                <i class="fas fa-eye" id="toggleRegisterPassword" onclick="togglePasswordVisibility('registerPassword', 'toggleRegisterPassword')"></i>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-success btn-block mb-4 w-100">Register</button>
+                        <button type="submit" class="btn btn-success btn-block mb-4 w-100"><i class="fa-solid fa-rocket"></i> Register</button>
                     </form>
                 </div>
             </section>

@@ -88,12 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
             roleCell.textContent = user.role;
 
             const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.classList.add('btn', 'btn-warning', 'btn-sm', 'me-2');
+            editButton.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:white"></i>';
+            editButton.classList.add('btn', 'btn-success', 'btn-sm', 'me-4','ms-4');
             editButton.addEventListener('click', () => editUser(index));
 
             const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove';
+            removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
             removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
             removeButton.addEventListener('click', () => removeUser(index));
 
@@ -111,12 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function editUser(index) {
         const user = users[index];
 
-        // Prevent editing of the logged-in admin user
-        // if (loggedInUser && loggedInUser.agentName === user.agentName) {
-        //     alert('You cannot edit your own user details.');
-        //     return;
-        // }
-
         const newAgentName = prompt('Enter new agent name:', user.agentName);
         const newPassword = prompt('Enter new password:', user.password);
 
@@ -127,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderUserTable();
         }
     }
-
     function removeUser(index) {
         // Prevent removal of the logged-in admin user
         const userToRemove = users[index];
@@ -144,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
 // Toggle password visibility function
 function togglePasswordVisibility(passwordId, toggleIconId) {
     const passwordField = document.getElementById(passwordId);
@@ -153,5 +145,6 @@ function togglePasswordVisibility(passwordId, toggleIconId) {
     passwordField.type = type;
 
     // Change the icon based on the visibility state
-    toggleIcon.textContent = passwordField.type === "password" ? "👁️" : "🙈";
+    toggleIcon.classList.toggle('fa-eye');
+    toggleIcon.classList.toggle('fa-eye-slash');
 }
