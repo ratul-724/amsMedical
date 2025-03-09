@@ -50,6 +50,7 @@
                         </div>
                         <div class="form-outline mb-4">
                             <input type="password" id="loginPassword" class="form-control" placeholder="Password" required />
+                            <span id="toggleLoginPassword" class="eye-icon" onclick="togglePasswordVisibility('loginPassword', 'toggleLoginPassword')">👁️</span>
                         </div>
                         <button type="submit" class="btn btn-success btn-block mb-4 signInBtn">Sign In</button>
                     </form>
@@ -62,11 +63,11 @@
                         </div>
                         <div class="form-outline mb-4">
                             <input type="password" id="registerPassword" class="form-control" placeholder="Password" required />
+                            <span id="toggleRegisterPassword" class="eye-icon" onclick="togglePasswordVisibility('registerPassword', 'toggleRegisterPassword')">👁️</span>
                         </div>
                         <button type="submit" class="btn btn-success btn-block mb-4 w-100">Register</button>
                     </form>
                 </div>
-                
             </section>
             <div id="userList">
                 <h2 class="text-center text-success fw-semibold pb-2">Registered Users</h2>
@@ -87,5 +88,7 @@
     </div>
     <script src="js/user.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
 </body>
 </html>

@@ -1,8 +1,6 @@
-// js/data.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const dataDisplay = document.getElementById('dataDisplay');
-    const formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
+    let formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
     if (!loggedInUser) {
@@ -23,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tbody = document.createElement('tbody');
 
             const headerRow = document.createElement('tr');
-            const headers = ['medicalName', 'date', 'id', 'name', 'passport', 'agent', 'physical', 'radiology', 'laboratory', 'remarks', 'agentRate'];
+            const headers = ['Medical-Name', 'date', 'id', 'name', 'passport', 'agent', 'physical', 'radiology', 'laboratory', 'remarks', 'Agent-Rate'];
 
             headers.forEach(headerText => {
                 const th = document.createElement('th');
@@ -49,6 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (loggedInUser.role === 'admin') {
                     const actionTd = document.createElement('td');
+
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.classList.add('btn', 'btn-warning', 'btn-sm', 'me-2');
+                    editButton.addEventListener('click', () => {
+                        localStorage.setItem('editIndex', index);
+                        window.location.href = 'index.html';
+                    });
+
                     const removeButton = document.createElement('button');
                     removeButton.textContent = 'Remove';
                     removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
@@ -57,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('formDataArray', JSON.stringify(formDataArray));
                         renderTable();
                     });
+
+                    actionTd.appendChild(editButton);
                     actionTd.appendChild(removeButton);
                     dataRow.appendChild(actionTd);
                 }
@@ -74,16 +83,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderTable();
 
+
     if (loggedInUser.role === 'admin') {
         document.getElementById('clearPage').addEventListener('click', () => {
-            localStorage.removeItem('formDataArray');
-            formDataArray.length = 0; // Reset the in-memory array
-            renderTable();
+            // Create confirmation dialog
+            let confirmation = confirm('Are you sure you want to remove all reports?');
+    
+            if (confirmation) {
+                localStorage.removeItem('formDataArray');
+                formDataArray.length = 0; // Reset the in-memory array
+                renderTable();
+                alert('All reports have been removed.');
+            } else {
+                alert('Deletation process cancelled.');
+            }
         });
-
+    
         document.getElementById('uploadData').addEventListener('click', () => {
             // Implement your upload logic here
             alert('Data uploaded to the database!');
         });
+    } else {
+        document.getElementById('clearPage').style.display = 'none';
+        document.getElementById('uploadData').style.display = 'none';
     }
+    
 });

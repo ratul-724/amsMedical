@@ -1,12 +1,10 @@
-// js/user.js
-
 document.addEventListener('DOMContentLoaded', () => {
     let users = JSON.parse(localStorage.getItem('users')) || [];
     console.log(users);
 
     // Ensure there is always at least one admin user
     if (!users.some(user => user.role === 'admin')) {
-        users.push({ agentName: 'alihossain', password: 'alihossain7240', role: 'admin' });
+        users.push({ agentName: 'Alihossen', password: 'Ams@Admin@1234', role: 'admin' });
         localStorage.setItem('users', JSON.stringify(users));
         console.log('Admin user added to ensure access.');
     }
@@ -57,6 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const agentName = document.getElementById('registerAgentName').value;
         const password = document.getElementById('registerPassword').value;
 
+        // Prevent creating duplicate users
+        const existingUser = users.find(user => user.agentName === agentName);
+        if (existingUser) {
+            alert('User already exists.');
+            return;
+        }
+
         const newUser = { agentName, password, role: 'user' };
         users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
@@ -106,6 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function editUser(index) {
         const user = users[index];
+
+        // Prevent editing of the logged-in admin user
+        if (loggedInUser && loggedInUser.agentName === user.agentName) {
+            alert('You cannot edit your own user details.');
+            return;
+        }
+
         const newAgentName = prompt('Enter new agent name:', user.agentName);
         const newPassword = prompt('Enter new password:', user.password);
 
@@ -118,6 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function removeUser(index) {
+        // Prevent removal of the logged-in admin user
+        const userToRemove = users[index];
+        if (loggedInUser && loggedInUser.agentName === userToRemove.agentName) {
+            alert('You cannot remove your own user account.');
+            return;
+        }
+
         if (confirm('Are you sure you want to remove this user?')) {
             users.splice(index, 1);
             localStorage.setItem('users', JSON.stringify(users));
@@ -125,3 +144,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+
+// Toggle password visibility function
+function togglePasswordVisibility(passwordId, toggleIconId) {
+    const passwordField = document.getElementById(passwordId);
+    const toggleIcon = document.getElementById(toggleIconId);
+    const type = passwordField.type === "password" ? "text" : "password";
+    passwordField.type = type;
+
+    // Change the icon based on the visibility state
+    toggleIcon.textContent = passwordField.type === "password" ? "👁️" : "🙈";
+}
