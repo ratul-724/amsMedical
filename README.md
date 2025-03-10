@@ -1,1 +1,1 @@
-live link : https://ratul-724.github.io/amcMedical/
+live link : https://ratul-724.github.io/amsMedical/
