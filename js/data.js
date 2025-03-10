@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tbody = document.createElement('tbody');
 
             const headerRow = document.createElement('tr');
-            const headers = ['Medical-Name', 'date', 'id', 'name', 'passport', 'agent', 'physical', 'radiology', 'laboratory', 'remarks', 'Agent-Rate'];
+            const headers = ['medical_name', 'date', 'id', 'name', 'passport', 'agent', 'physical', 'radiology', 'laboratory', 'remarks', 'agent_rate'];
 
             headers.forEach(headerText => {
                 const th = document.createElement('th');
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dataRow = document.createElement('tr');
                 headers.forEach(header => {
                     const td = document.createElement('td');
-                    td.textContent = formData[header];
+                    td.textContent = formData[header] || ''; // Ensure that undefined values are handled
                     dataRow.appendChild(td);
                 });
 
@@ -93,17 +93,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTable();
                 alert('All reports have been removed.');
             } else {
-                alert('Deletation process cancelled.');
+                alert('Deletion process cancelled.');
             }
         });
     
         document.getElementById('uploadData').addEventListener('click', () => {
-            // Implement your upload logic here
-            alert('Data uploaded to the database!');
+            fetch('php/upload_data.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formDataArray)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Debugging information
+                if (data.status === 'success') {
+                    alert('Data uploaded to the server successfully!');
+                } else {
+                    alert('Error uploading data: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while uploading data.');
+            });
         });
     } else {
         document.getElementById('clearPage').style.display = 'none';
         document.getElementById('uploadData').style.display = 'none';
     }
-    
 });
