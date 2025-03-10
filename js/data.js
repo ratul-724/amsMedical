@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('clearPage').addEventListener('click', () => {
             // Create confirmation dialog
             let confirmation = confirm('Are you sure you want to remove all reports?');
-    
+
             if (confirmation) {
                 localStorage.removeItem('formDataArray');
                 formDataArray.length = 0; // Reset the in-memory array
@@ -96,22 +96,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Deletion process cancelled.');
             }
         });
-    
+
         document.getElementById('uploadData').addEventListener('click', () => {
-            fetch('php/upload_data.php', {
+            let formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
+        
+            // 🔹 Remove duplicates before sending
+            let uniqueData = [];
+            let ids = new Set();
+        
+            formDataArray.forEach(data => {
+                if (!ids.has(data.id)) {
+                    ids.add(data.id);
+                    uniqueData.push(data);
+                }
+            });
+        
+            console.log('Filtered Data being sent:', uniqueData);
+        
+            fetch('http://localhost/amsMedical/php/upload_data.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formDataArray)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(uniqueData)
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data); // Debugging information
+                console.log(data);
                 if (data.status === 'success') {
-                    alert('Data uploaded to the server successfully!');
+                    alert(data.message);
                 } else {
-                    alert('Error uploading data: ' + data.message);
+                    alert('Error: ' + data.message);
                 }
             })
             .catch(error => {
@@ -119,6 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('An error occurred while uploading data.');
             });
         });
+            
+        
     } else {
         document.getElementById('clearPage').style.display = 'none';
         document.getElementById('uploadData').style.display = 'none';
