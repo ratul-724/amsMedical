@@ -44,14 +44,14 @@
         <main>
             <section id="loginAndRegister" class="row">
                 <div id="login" class="col-10 col-md-5 my-5 m-auto">
-                    <form id="loginForm" action="login.php" method="POST">
+                    <form id="loginForm" action="http://localhost/amsMedical/backend/login.php" method="POST">
                         <h2 class="text-center text-success fw-semibold pb-2">Sign In</h2>
                         <div class="form-outline mb-4 ">
                             <input type="text" id="loginAgentName" name="loginAgentName" class="form-control border-1 border-black rounded-5" placeholder="Agent Name" required />
                         </div>
                         <div class="form-outline mb-4">
                             <div class="password-container w-100">
-                                <input type="password" id="loginPassword" name="loginPassword" class="rounded-5 border-1 border-black p-2 w-100" placeholder="Password">
+                                <input type="password" id="loginPassword" name="loginPassword" class="rounded-5 border-1 border-black p-2 w-100" placeholder="Password" required minlength="6">
                                 <i class="fas fa-eye" id="toggleLoginPassword" onclick="togglePasswordVisibility('loginPassword', 'toggleLoginPassword')"></i>
                             </div>
                         </div>
@@ -59,21 +59,28 @@
                     </form>
                 </div>
                 <div id="register" class="col-10 col-md-5 my-5 m-auto" style="display: none;">
-                    <form id="registerForm" action="register.php" method="POST">
+                    <form id="registerForm" action="http://localhost/amsMedical/backend/register.php" method="POST">
                         <h2 class="text-center text-success fw-semibold pb-2">Register User</h2>
                         <div class="form-outline mb-4">
                             <input type="text" id="registerAgentName" name="registerAgentName" class="form-control border-1 border-black rounded-5" placeholder="Agent Name" required />
                         </div>
                         <div class="form-outline mb-4">
                             <div class="password-container w-100">
-                                <input type="password" class="rounded-5 border-1 border-black p-2 w-100" id="registerPassword" name="registerPassword" placeholder="Password">
+                                <input type="password" class="rounded-5 border-1 border-black p-2 w-100" id="registerPassword" name="registerPassword" placeholder="Password" required minlength="6">
                                 <i class="fas fa-eye" id="toggleRegisterPassword" onclick="togglePasswordVisibility('registerPassword', 'toggleRegisterPassword')"></i>
                             </div>
                         </div>
+                        <!-- <div>
+                            <select name="registerRole" id="registerRole">
+                                <option value="admin">Admin</option>
+                                <option value="agent">Agent</option>
+                            </select>
+                        </div> -->
                         <button type="submit" class="btn btn-success btn-block mb-4 w-100"><i class="fa-solid fa-rocket"></i> Register</button>
                     </form>
                 </div>
             </section>
+
             <div id="userList">
                 <h2 class="text-center text-success fw-semibold pb-2">Registered Users</h2>
                 <table class="table table-bordered">

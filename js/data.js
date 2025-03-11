@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
             console.log('Filtered Data being sent:', uniqueData);
         
-            fetch('http://localhost/amsMedical/php/upload_data.php', {
+            fetch('http://localhost/amsMedical/backend/upload_data.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(uniqueData)
