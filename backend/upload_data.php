@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($data as $row) {
         //  Check if ID already exists
         $checkStmt = $conn->prepare('SELECT id FROM medical_data WHERE id = ?');
-        $checkStmt->bind_param('i', $row['id']);
+        $checkStmt->bind_param('s', $row['id']);
         $checkStmt->execute();
         $checkStmt->store_result();
 

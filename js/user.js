@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     let users = JSON.parse(localStorage.getItem('users')) || [];
-    console.log(users);
+    // console.log(users);
 
     // Ensure there is always at least one admin user
     if (!users.some(user => user.role === 'admin')) {

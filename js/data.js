@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dataDisplay = document.getElementById('dataDisplay');
-    let formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
     if (!loggedInUser) {
@@ -9,10 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const renderTable = () => {
+    const renderTable = (data) => {
         dataDisplay.innerHTML = '';
-        const filteredData = loggedInUser.role === 'admin' ? formDataArray : formDataArray.filter(data => data.agent === loggedInUser.agentName);
-        if (filteredData.length > 0) {
+        if (data.length > 0) {
             const table = document.createElement('table');
             table.classList.add('table', 'table-bordered', 'table-striped');
 
@@ -28,15 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 headerRow.appendChild(th);
             });
 
-            if (loggedInUser.role === 'admin') {
-                const th = document.createElement('th');
-                th.textContent = 'Actions';
-                headerRow.appendChild(th);
-            }
+            const th = document.createElement('th');
+            th.textContent = 'Actions';
+            headerRow.appendChild(th);
 
             thead.appendChild(headerRow);
 
-            filteredData.forEach((formData, index) => {
+            data.forEach((formData, index) => {
                 const dataRow = document.createElement('tr');
                 headers.forEach(header => {
                     const td = document.createElement('td');
@@ -44,30 +40,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     dataRow.appendChild(td);
                 });
 
-                if (loggedInUser.role === 'admin') {
-                    const actionTd = document.createElement('td');
+                const actionTd = document.createElement('td');
 
-                    const editButton = document.createElement('button');
-                    editButton.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
-                    editButton.classList.add('btn', 'btn-success', 'btn-sm', 'me-4');
-                    editButton.addEventListener('click', () => {
-                        localStorage.setItem('editIndex', index);
-                        window.location.href = 'index.html';
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+                editButton.classList.add('btn', 'btn-success', 'btn-sm', 'me-4');
+                editButton.addEventListener('click', () => {
+                    localStorage.setItem('editIndex', index);
+                    localStorage.setItem('editData', JSON.stringify(formData));
+                    window.location.href = 'index.html';
+                });
+
+                const removeButton = document.createElement('button');
+                removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
+                removeButton.addEventListener('click', () => {
+                    fetch('http://localhost/amsMedical/backend/deleteData.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: formData.id })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Data deleted successfully.');
+                            fetchData(); // Refresh the table
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting data.');
                     });
+                });
 
-                    const removeButton = document.createElement('button');
-                    removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
-                    removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
-                    removeButton.addEventListener('click', () => {
-                        formDataArray.splice(index, 1);
-                        localStorage.setItem('formDataArray', JSON.stringify(formDataArray));
-                        renderTable();
-                    });
-
-                    actionTd.appendChild(editButton);
-                    actionTd.appendChild(removeButton);
-                    dataRow.appendChild(actionTd);
-                }
+                actionTd.appendChild(editButton);
+                actionTd.appendChild(removeButton);
+                dataRow.appendChild(actionTd);
 
                 tbody.appendChild(dataRow);
             });
@@ -80,7 +90,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    renderTable();
+    const fetchData = () => {
+        fetch('http://localhost/amsMedical/backend/getData.php')
+            .then(response => response.json())
+            .then(data => {
+                renderTable(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                dataDisplay.innerHTML = '<p>An error occurred while fetching data.</p>';
+            });
+    };
+
+    fetchData();
 
     if (loggedInUser.role === 'admin') {
         document.getElementById('clearPage').addEventListener('click', () => {
@@ -88,52 +110,69 @@ document.addEventListener('DOMContentLoaded', () => {
             let confirmation = confirm('Are you sure you want to remove all reports?');
 
             if (confirmation) {
-                localStorage.removeItem('formDataArray');
-                formDataArray.length = 0; // Reset the in-memory array
-                renderTable();
-                alert('All reports have been removed.');
+                fetch('http://localhost/amsMedical/backend/clearData.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        fetchData(); // Refresh the table
+                        alert('All reports have been removed.');
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while clearing data.');
+                });
             } else {
                 alert('Deletion process cancelled.');
             }
         });
 
         document.getElementById('uploadData').addEventListener('click', () => {
-            let formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
-        
-            // 🔹 Remove duplicates before sending
-            let uniqueData = [];
-            let ids = new Set();
-        
-            formDataArray.forEach(data => {
-                if (!ids.has(data.id)) {
-                    ids.add(data.id);
-                    uniqueData.push(data);
-                }
-            });
-        
-            console.log('Filtered Data being sent:', uniqueData);
-        
-            fetch('http://localhost/amsMedical/backend/upload_data.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(uniqueData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data.status === 'success') {
-                    alert(data.message);
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while uploading data.');
-            });
+            fetch('http://localhost/amsMedical/backend/getData.php')
+                .then(response => response.json())
+                .then(data => {
+                    // 🔹 Remove duplicates before sending
+                    let uniqueData = [];
+                    let ids = new Set();
+
+                    data.forEach(item => {
+                        if (!ids.has(item.id)) {
+                            ids.add(item.id);
+                            uniqueData.push(item);
+                        }
+                    });
+
+                    console.log('Filtered Data being sent:', uniqueData);
+
+                    fetch('http://localhost/amsMedical/backend/upload_data.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(uniqueData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        if (data.status === 'success') {
+                            alert(data.message);
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while uploading data.');
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while fetching data.');
+                });
         });
-            
-        
     } else {
         document.getElementById('clearPage').style.display = 'none';
         document.getElementById('uploadData').style.display = 'none';
