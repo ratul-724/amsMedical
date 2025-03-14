@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (user) {
             localStorage.setItem('loggedInUser', JSON.stringify(user));
-            window.location.href = 'data.html';
+            window.location.href = 'index.html';
         } else {
             alert('Invalid information');
         }

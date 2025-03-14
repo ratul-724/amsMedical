@@ -16,6 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const fetchAllIds = () => {
+        return fetch('http://localhost/amsMedical/backend/getAllIds.php')
+            .then(response => response.json())
+            .then(data => {
+                return data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching IDs.');
+                return { tempIds: [], medIds: [] };
+            });
+    };
+
     form.addEventListener('submit', function(event) {
         event.preventDefault();
 
@@ -25,34 +38,54 @@ document.addEventListener('DOMContentLoaded', () => {
             jsonData[key] = value;
         });
 
-        fetch('http://localhost/amsMedical/backend/temporary_submit_data.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(jsonData)
-        })
-        .then(response => response.text()) // Get response as text
-        .then(text => {
-            console.log('Response Text:', text); // Log the response text for debugging
-            try {
-                const data = JSON.parse(text); // Try to parse JSON
-                const messageBox = document.getElementById('responseMessage');
-                if (messageBox) {
-                    messageBox.textContent = data.message;
-                    messageBox.style.color = data.success ? "green" : "red";
-                }
+        fetchAllIds().then(idsData => {
+            const { tempIds, medIds } = idsData;
 
-                if (data.success) {
-                    form.reset(); // Reset the form after successful submission
-                    alert('Data submitted successfully!'); // Show alert message
-                    localStorage.removeItem('editIndex'); // Clear edit index after saving
-                    localStorage.removeItem('editData'); // Clear edit data after saving
-                }
-            } catch (error) {
-                console.error('❌ JSON Parse Error:', error);
-                console.log('Response Text:', text); // Log the response text for debugging
+            // Check for duplicate ID
+            const duplicate = tempIds.includes(jsonData.id) || medIds.includes(jsonData.id);
+            if (duplicate) {
+                alert('Duplicate ID found. Please use a unique ID.');
+                return;
             }
-        })
-        .catch(error => console.error('❌ Fetch Error:', error));
+
+            fetch('http://localhost/amsMedical/backend/temporary_submit_data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.text()) // Get response as text
+            .then(text => {
+                console.log('Response Text:', text); // Log the response text for debugging
+                try {
+                    const data = JSON.parse(text); // Try to parse JSON
+                    const messageBox = document.getElementById('responseMessage');
+                    if (messageBox) {
+                        messageBox.textContent = data.message;
+                        messageBox.style.color = data.success ? "green" : "red";
+                    }
+
+                    if (data.success) {
+                        form.reset(); // Reset the form after successful submission
+                        alert('Data submitted successfully!'); // Show alert message
+
+                        if (editIndex !== null) {
+                            formDataArray[Number(editIndex)] = jsonData;
+                            localStorage.removeItem('editIndex'); // Clear edit index after saving
+                            localStorage.removeItem('editData'); // Clear edit data after saving
+                        } else {
+                            formDataArray.push(jsonData);
+                        }
+
+                        localStorage.setItem('formDataArray', JSON.stringify(formDataArray));
+                        // window.location.href = 'data.html';
+                    }
+                } catch (error) {
+                    console.error('❌ JSON Parse Error:', error);
+                    console.log('Response Text:', text); // Log the response text for debugging
+                }
+            })
+            .catch(error => console.error('❌ Fetch Error:', error));
+        });
     });
 
     if (loggedInUser && loggedInUser.role !== 'admin') {
@@ -61,23 +94,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // If editing, pre-fill form including the date field
-    // if (editIndex !== null) {
-    //     const formData = formDataArray[Number(editIndex)];
+    if (editIndex !== null) {
+        const formData = formDataArray[Number(editIndex)];
 
-    //     if (formData) {
-    //         for (const key in formData) {
-    //             if (form.elements[key]) {
-    //                 if (key === 'date') {
-    //                     const [day, month, year] = formData[key].split('-');
-    //                     form.elements[key].value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    //                 } else {
-    //                     form.elements[key].value = formData[key];
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
+        if (formData) {
+            for (const key in formData) {
+                if (form.elements[key]) {
+                    if (key === 'date') {
+                        // Convert stored "DD-MM-YYYY" to "YYYY-MM-DD" format for the input field
+                        const [day, month, year] = formData[key].split('-');
+                        form.elements[key].value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    } else {
+                        form.elements[key].value = formData[key];
+                    }
+                }
+            }
+        }
+    }
         if (editIndex !== null) {
             formDataArray[Number(editIndex)] = data;
             localStorage.removeItem('editIndex'); 

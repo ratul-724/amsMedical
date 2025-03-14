@@ -1,35 +1,21 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
-
-// Connect to MySQL
+header('Content-Type: application/json');
 include 'db_config.php';
 
-header('Content-Type: application/json');
+$data = json_decode(file_get_contents('php://input'), true);
+$response = ['status' => 'error', 'message' => 'Failed to delete data'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    if (!$data || !isset($data['id'])) {
-        echo json_encode(['status' => 'error', 'message' => 'Invalid JSON format or missing ID']);
-        exit;
-    }
-
-    $stmt = $conn->prepare('DELETE FROM temporary_medical_data WHERE id = ?');
-    $stmt->bind_param('s', $data['id']);
-
-    if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Data deleted successfully']);
+if (!empty($data['id'])) {
+    $id = $data['id'];
+    // Delete data from temporary_medical_data and medical_data tables
+    $sqlTemp = "DELETE FROM temporary_medical_data WHERE id = '$id'";
+    $sqlMed = "DELETE FROM medical_data WHERE id = '$id'";
+    if ($conn->query($sqlTemp) === TRUE || $conn->query($sqlMed) === TRUE) {
+        $response = ['status' => 'success', 'message' => 'Data deleted successfully'];
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Error deleting data: ' . $stmt->error]);
+        $response = ['status' => 'error', 'message' => 'Error deleting record: ' . $conn->error];
     }
-
-    $stmt->close();
-    $conn->close();
 }
+
+echo json_encode($response);
 ?>
