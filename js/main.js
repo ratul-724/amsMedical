@@ -1,10 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('dataForm');
     const dataEntryForm = document.getElementById('dataEntryForm');
-    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     let formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
     const editIndex = localStorage.getItem('editIndex'); // Get edit index from localStorage
     const editData = JSON.parse(localStorage.getItem('editData')); // Get edit data from localStorage
+    const welcomeNameElement = document.getElementById('welcomeName');
+    const userIcon = document.querySelector('.user-icon img'); // Select the <img> element inside .user-icon
+
+    // Change user icon if logged-in user name is "Alihossen"
+    if (loggedInUser && loggedInUser.name === "Alihossen") {
+        if (userIcon) { // Ensure the userIcon exists
+            userIcon.src = "media/icons/ali.jpg"; // Update the user icon src
+            console.log("User icon changed successfully!");
+        } else {
+            console.log("❌ User icon not found!");
+        }
+    }
+
+    // Display logged-in user's name
+    if (loggedInUser && loggedInUser.agentName) {
+        welcomeNameElement.textContent = loggedInUser.agentName;
+    } else {
+        welcomeNameElement.textContent = "Guest"; // Default if no user is logged in    
+    }
 
     if (!form) return; // Prevent errors if form is missing
 

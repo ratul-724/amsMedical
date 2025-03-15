@@ -1,33 +1,44 @@
-main{
+main {
     min-height: 100vh;
     width: 100%;
 }
-.dataView{
+
+.dataView {
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
     scrollbar-color: #036318 #d0cfcf;
 }
-table {
+
+.dataView table {
     border-collapse: collapse;
     width: 100%;
 }
 
-table, th, td {
+.dataView table, th, td {
     border: 1px solid black;
 }
+
+.dataPageTop {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 80px; /* Adjust this value based on the height of your header */
+    background: linear-gradient(to bottom right, #f1f1f1, #cceccc);
+    z-index: 99; /* Ensure it stays above other content */
+}
+
 /* responsive design */
 @media screen and (max-width: 768px) {
-    .dataView{
+    .dataView {
         overflow-x: auto;
         overflow-y: hidden;
         scrollbar-width: thin;
         scrollbar-color: #036318 #d0cfcf;
     }
-    .dataPageTop h2{
+    .dataPageTop h2 {
         font-size: 16px;
     }
-    .clearUploadBtn button{
+    .clearUploadBtn button {
         font-size: 12px;
         padding: 5px;
     }
