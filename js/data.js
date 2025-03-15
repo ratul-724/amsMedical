@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayElement = isUploaded ? allDataDisplay : dataDisplay;
         displayElement.innerHTML = '';
         if (data.length > 0) {
+            // Sort data by date
+            data.sort((a, b) => new Date(a.date) - new Date(b.date));
+
             const table = document.createElement('table');
             table.classList.add('table', 'table-bordered', 'table-striped');
 
@@ -51,37 +54,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loggedInUser.role === 'admin') {
                     const actionTd = document.createElement('td');
 
-                    if (!isUploaded) {
-                        const singleReportUploadButton = document.createElement('button');
-                        singleReportUploadButton.innerHTML = '<i class="fa-solid fa-upload"></i>';
-                        singleReportUploadButton.classList.add('btn', 'btn-primary', 'btn-sm', 'me-1');
-                        singleReportUploadButton.addEventListener('click', () => {
-                            let confirmation = confirm('Are you sure you want to upload this report?');
-                            if (confirmation) {
-                                fetch('http://localhost/amsMedical/backend/upload_data.php', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify([formData]) // Send as an array with a single element
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.status === 'success') {
-                                        alert('This report uploaded successfully.');
-                                        fetchData(); // Refresh the table
-                                    } else {
-                                        alert('Error: ' + data.message);
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    alert('An error occurred while uploading the report.');
-                                });
-                            } else {
-                                alert('Upload process cancelled.');
-                            }
-                        });
-                        actionTd.appendChild(singleReportUploadButton);
-                    }
+                    const singleReportUploadButton = document.createElement('button');
+                    singleReportUploadButton.classList.add('btn', 'btn-sm', 'me-1');
+
+                    // Check if the data already exists in medical_data
+                    fetch('http://localhost/amsMedical/backend/check_data.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: formData.id })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            singleReportUploadButton.innerHTML = '<i class="fa-solid fa-check"></i>';
+                            singleReportUploadButton.classList.add('btn-success');
+                            singleReportUploadButton.disabled = true;
+                        } else {
+                            singleReportUploadButton.innerHTML = '<i class="fa-solid fa-upload"></i>';
+                            singleReportUploadButton.classList.add('btn-primary');
+                            singleReportUploadButton.addEventListener('click', () => {
+                                let confirmation = confirm('Are you sure you want to upload this report?');
+                                if (confirmation) {
+                                    fetch('http://localhost/amsMedical/backend/upload_data.php', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify([formData]) // Send as an array with a single element
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === 'success') {
+                                            singleReportUploadButton.innerHTML = '<i class="fa-solid fa-check"></i>';
+                                            singleReportUploadButton.classList.remove('btn-primary');
+                                            singleReportUploadButton.classList.add('btn-success');
+                                            singleReportUploadButton.disabled = true;
+                                            fetchData(); // Refresh the table
+                                        } else if (data.status === 'already_uploaded') {
+                                            alert('This report is already uploaded.');
+                                        } else {
+                                            alert('Error: ' + data.message);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        alert('An error occurred while uploading the report.');
+                                    });
+                                } else {
+                                    alert('Upload process cancelled.');
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while checking the report.');
+                    });
+
+                    actionTd.appendChild(singleReportUploadButton);
 
                     const editButton = document.createElement('button');
                     editButton.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
@@ -285,6 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (data.status === 'success') {
                             alert(data.message);
                             fetchData(); // Refresh the table
+                        } else if (data.status === 'already_uploaded') {
+                            alert('Some reports are already uploaded.');
                         } else {
                             alert('Error: ' + data.message);
                         }

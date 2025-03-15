@@ -2,16 +2,23 @@ main{
     min-height: 100vh;
     width: 100%;
 }
-#dataDisplay{
+.dataView{
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: thin;
     scrollbar-color: #036318 #d0cfcf;
 }
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
 
+table, th, td {
+    border: 1px solid black;
+}
 /* responsive design */
 @media screen and (max-width: 768px) {
-    #dataDisplay{
+    .dataView{
         overflow-x: auto;
         overflow-y: hidden;
         scrollbar-width: thin;
