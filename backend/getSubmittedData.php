@@ -7,17 +7,16 @@ $agentName = $loggedInUser['agentName'];
 $role = $loggedInUser['role'];
 
 if ($role === 'admin') {
-    // Fetch all submitted data for admin
-    $result = $conn->query("SELECT * FROM temporary_medical_data");
+  // Fetch all submitted data for admin
+  $result = $conn->query("SELECT * FROM temporary_medical_data");
 } else {
-    // Fetch submitted data for the specific agent
-    $result = $conn->query("SELECT * FROM temporary_medical_data WHERE agent = '$agentName'");
+  // Fetch submitted data for the specific agent
+  $result = $conn->query("SELECT * FROM temporary_medical_data WHERE agent = '$agentName'");
 }
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
+  $data[] = $row;
 }
-
 echo json_encode($data);
 ?>
