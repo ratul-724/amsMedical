@@ -1,40 +1,48 @@
 <?php
-header("Content-Type: application/json");
-require_once "db_config.php"; 
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+header('Content-Type: application/json');
+include 'db_config.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($data['id']) || empty($data['id'])) {
-    echo json_encode(["status" => "error", "message" => "Missing record ID"]);
-    exit;
+// Validate input data
+if (!$data || !isset($data['id']) || !isset($data['medical_name']) || !isset($data['date']) || !isset($data['name']) || !isset($data['passport']) || !isset($data['agent']) || !isset($data['physical']) || !isset($data['radiology']) || !isset($data['laboratory']) || !isset($data['remarks']) || !isset($data['agent_rate'])) {
+    echo json_encode(["status" => "error", "message" => "Invalid input data"]);
+    exit();
 }
 
-$id = intval($data['id']); // Ensure ID is an integer
-$fieldsToUpdate = [];
+// Extract values
+$id = $data['id'];
+$medical_name = $data['medical_name'];
+$date = $data['date'];
+$name = $data['name'];
+$passport = $data['passport'];
+$agent = $data['agent'];
+$physical = $data['physical'];
+$radiology = $data['radiology'];
+$laboratory = $data['laboratory'];
+$remarks = $data['remarks'];
+$agent_rate = $data['agent_rate'];
 
-foreach ($data as $key => $value) {
-    if ($key !== 'id' && !empty($value)) {
-        $fieldsToUpdate[] = "$key = '" . mysqli_real_escape_string($conn, $value) . "'";
-    }
+// Prepare SQL statement
+$sql = "UPDATE temporary_medical_data SET medical_name=?, date=?, name=?, passport=?, agent=?, physical=?, radiology=?, laboratory=?, remarks=?, agent_rate=? WHERE id=?";
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    echo json_encode(["status" => "error", "message" => "SQL Prepare Failed: " . $conn->error]);
+    exit();
 }
 
-if (empty($fieldsToUpdate)) {
-    echo json_encode(["status" => "error", "message" => "No valid fields to update"]);
-    exit;
-}
+// Bind parameters
+$stmt->bind_param("ssssssssssi", $medical_name, $date, $name, $passport, $agent, $physical, $radiology, $laboratory, $remarks, $agent_rate, $id);
 
-// ✅ Correct Query with Unique ID
-$updateQuery = "UPDATE medical_data SET " . implode(", ", $fieldsToUpdate) . " WHERE id = '$id' LIMIT 1";
-error_log("SQL QUERY: " . $updateQuery); // Debugging
-
-if (mysqli_query($conn, $updateQuery)) {
-    echo json_encode(["status" => "success", "message" => "Record updated successfully"]);
+// Execute the statement
+if ($stmt->execute()) {
+    echo json_encode(["status" => "success", "message" => "Data updated successfully"]);
 } else {
-    echo json_encode(["status" => "error", "message" => "Database update failed: " . mysqli_error($conn)]);
+    echo json_encode(["status" => "error", "message" => "Update failed: " . $stmt->error]);
 }
 
-mysqli_close($conn);
+// Close the statement and connection
+$stmt->close();
+$conn->close();
 ?>
