@@ -82,27 +82,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         return tbody;
     };
 
+    const createTableCell = (content, key) => {
+        const td = document.createElement('td');
+    
+        // Convert content to uppercase for specific columns
+        if (['physical', 'radiology', 'laboratory', 'remarks'].includes(key)) {
+            content = content.toUpperCase();
+        }
+    
+        td.textContent = content || '';
+    
+        // Apply red background if the value is "UNFIT"
+        if (['physical', 'radiology', 'laboratory', 'remarks'].includes(key) && content === 'UNFIT') {
+            td.style.backgroundColor = 'red';
+            td.style.color = 'white'; // Optional: Ensure text is readable
+        }
+    
+        return td;
+    };
+    
     const createTableRow = (rowData, isAdmin) => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', rowData.id); // Add unique ID to the row
-
+    
+        // Check if any of the specified columns has the value "UNFIT"
+        const isUnfit = ['physical', 'radiology', 'laboratory', 'remarks'].some(
+            key => rowData[key]?.toUpperCase() === 'UNFIT'
+        );
+    
+        // Apply red background to the entire row if "UNFIT" is found
+        if (isUnfit) {
+            row.style.backgroundColor = 'red';
+            row.style.color = 'white'; // Optional: Ensure text is readable
+        }
+    
+        // Create and append table cells
         Object.keys(rowData).forEach(key => {
-            const cell = createTableCell(rowData[key]);
+            const cell = createTableCell(rowData[key], key); // Pass the key to createTableCell
             row.appendChild(cell);
         });
-
+    
+        // Append action buttons for admin
         if (isAdmin) {
             const actionCell = createActionCell(rowData);
             row.appendChild(actionCell);
         }
-
+    
         return row;
-    };
-
-    const createTableCell = (content) => {
-        const td = document.createElement('td');
-        td.textContent = content || '';
-        return td;
     };
 
     const createActionCell = (rowData) => {

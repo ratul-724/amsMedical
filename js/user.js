@@ -103,11 +103,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     logoutLink.addEventListener('click', () => {
-        localStorage.removeItem('loggedInUser');
-        alert('Logged out successfully.');
-        window.location.href = 'user.html';
+        // Display a confirmation dialog
+        const confirmLogout = confirm('Are you sure you want to logout?');
+        
+        // If the user confirms, proceed with logout
+        if (confirmLogout) {
+            localStorage.removeItem('loggedInUser');
+            alert('Logged out successfully.');
+            window.location.href = 'user.html';
+        }
     });
-
     // Function to load the user list (to display updated user list)
     function loadUserList() {
         fetch('http://localhost/amsMedical/backend/userList.php') // ✅ Fetch from MySQL via userList.php
