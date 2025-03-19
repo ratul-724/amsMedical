@@ -64,7 +64,8 @@ header .logo{
     padding-top: 30px;
 }
 .menu-item {
-    padding: 20px 15px;
+    padding: 15px;
+    margin: 15px 0;
     cursor: pointer;
     display: flex;
     align-items: center;

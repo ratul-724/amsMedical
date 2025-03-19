@@ -1,155 +1,147 @@
-document.addEventListener('DOMContentLoaded', function() {
-    let users = JSON.parse(localStorage.getItem('users')) || [];
-    // console.log(users);
-
-    // Ensure there is always at least one admin user
-    if (!users.some(user => user.role === 'admin')) {
-        const adminUser = { agentName: 'Alihossen', password: 'Ams@Admin@1234', role: 'admin' };
-        users.push(adminUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        console.log('Admin user added to ensure access.');
-
-        // Save the admin user to the database
-        fetch('http://localhost/amsMedical/backend/register.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(adminUser)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("📥 Server Response:", data); // Debug Response
-            if (!data.success) {
-                alert('Failed to add admin user to the database: ' + data.message);
-            }
-        })
-        .catch(error => console.error('❌ Fetch Error:', error));
-    }
-
+document.addEventListener('DOMContentLoaded', function () {
+    const users = JSON.parse(localStorage.getItem('users')) || [];
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const userTableBody = document.getElementById('userTableBody');
+    const logoutLink = document.getElementById('logout');
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
-    // Show or hide the logout option based on login status
-    const logoutLink = document.getElementById('logout');
-    if (loggedInUser) {
-        logoutLink.style.display = 'block';
-    } else {
-        logoutLink.style.display = 'none';
+    // Ensure there is always at least one admin user
+    ensureAdminUserExists(users);
+
+    // Show or hide UI elements based on login status
+    updateUIForLoginStatus(loggedInUser);
+
+    // Event listeners
+    loginForm?.addEventListener('submit', handleLogin);
+    registerForm?.addEventListener('submit', handleRegister);
+    logoutLink?.addEventListener('click', handleLogout);
+
+    // Load user list if admin is logged in
+    if (loggedInUser?.role === 'admin') {
+        loadUserList();
     }
 
-    if (loggedInUser && loggedInUser.role === 'admin') {
-        document.getElementById('register').style.display = 'block';
-        document.getElementById('userList').style.display = 'block';
-        loadUserList(); // Load user list on page load
+    // ==================== Functions ====================
+
+    // Ensure an admin user exists
+    function ensureAdminUserExists(users) {
+        if (!users.some(user => user.role === 'admin')) {
+            const adminUser = { agentName: 'Alihossen', password: 'Ams@Admin@1234', role: 'admin' };
+            users.push(adminUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            console.log('Admin user added to ensure access.');
+
+            // Save the admin user to the database
+            fetchData('http://localhost/amsMedical/backend/register.php', 'POST', adminUser)
+                .then(data => {
+                    if (!data.success) {
+                        alert('Failed to add admin user to the database: ' + data.message);
+                    }
+                });
+        }
     }
 
-    loginForm.addEventListener('submit', (event) => {
+    // Update UI based on login status
+    function updateUIForLoginStatus(loggedInUser) {
+        if (loggedInUser) {
+            logoutLink.style.display = 'block';
+            if (loggedInUser.role === 'admin') {
+                document.getElementById('register').style.display = 'block';
+                document.getElementById('userList').style.display = 'block';
+            }
+        } else {
+            logoutLink.style.display = 'none';
+        }
+    }
+
+    // Handle login form submission
+    async function handleLogin(event) {
         event.preventDefault();
-
+    
         const agentName = document.getElementById('loginAgentName').value;
         const password = document.getElementById('loginPassword').value;
-
+    
+        // Fetch the latest user data from the database
+        const users = await fetchData('http://localhost/amsMedical/backend/userList.php', 'GET');
+    
+        if (!users || !Array.isArray(users)) {
+            alert('Failed to fetch user data. Please try again.');
+            return;
+        }
+    
+        // Check if the entered credentials match any user in the database
         const user = users.find(user => user.agentName === agentName && user.password === password);
-
+    
         if (user) {
+            // Save the logged-in user to localStorage
             localStorage.setItem('loggedInUser', JSON.stringify(user));
             window.location.href = 'index.html';
         } else {
-            alert('Invalid information');
+            alert('Invalid credentials. Please try again.');
         }
-    });
+    }
 
-    registerForm.addEventListener('submit', function(event) {
+    // Handle registration form submission
+    function handleRegister(event) {
         event.preventDefault();
-        
-        const agentName = document.getElementById("registerAgentName").value;
-        const password = document.getElementById("registerPassword").value;
+
+        const agentName = document.getElementById('registerAgentName').value;
+        const password = document.getElementById('registerPassword').value;
         const role = 'user'; // Default role set to 'user'
-        
-        const requestData = {
-            agentName: agentName, 
-            password: password, 
-            role: role
-        };
-        
-        console.log("📤 Sending JSON Data:", JSON.stringify(requestData)); // Debug JSON Output
-        
-        fetch('http://localhost/amsMedical/backend/register.php', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json' // ✅ Ensure JSON Format
-            },
-            body: JSON.stringify(requestData) // ✅ Convert Data to JSON
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("📥 Server Response:", data); // Debug Response
-            alert(data.message);
-            if (data.success) {
-                // Add the new user to the local users array (frontend)
-                const newUser = {
-                    agentName: agentName,
-                    password: password,
-                    role: role
-                };
-                users.push(newUser);  // Add the new user to the array
-                localStorage.setItem('users', JSON.stringify(users)); // Save updated array to localStorage
-                
-                loadUserList(); // Reload the user list after successful registration
-            }
-        })
-        .catch(error => console.error('❌ Fetch Error:', error));
-    });
-    
-    logoutLink.addEventListener('click', () => {
-        // Display a confirmation dialog
-        const confirmLogout = confirm('Are you sure you want to logout?');
-        
-        // If the user confirms, proceed with logout
-        if (confirmLogout) {
+
+        const requestData = { agentName, password, role };
+
+        fetchData('http://localhost/amsMedical/backend/register.php', 'POST', requestData)
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    users.push(requestData); // Add the new user to the array
+                    localStorage.setItem('users', JSON.stringify(users)); // Save updated array to localStorage
+                    loadUserList(); // Reload the user list after successful registration
+                }
+            });
+    }
+
+    // Handle logout
+    function handleLogout() {
+        if (confirm('Are you sure you want to logout?')) {
             localStorage.removeItem('loggedInUser');
             alert('Logged out successfully.');
             window.location.href = 'user.html';
         }
-    });
-    // Function to load the user list (to display updated user list)
+    }
+
+    // Load user list from the server
     function loadUserList() {
-        fetch('http://localhost/amsMedical/backend/userList.php') // ✅ Fetch from MySQL via userList.php
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+        fetchData('http://localhost/amsMedical/backend/userList.php', 'GET')
             .then(users => {
                 userTableBody.innerHTML = ''; // Clear table before adding new data
                 users.forEach(user => {
-                    const row = `<tr>
-                        <td>${user.agentName}</td>
-                        <td>${user.role}</td>
-                        <td>
-                            <button onclick="editUser(${user.id}, '${user.agentName}', '${user.password}', '${user.role}')" class="btn btn-success mx-md-4">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button onclick="removeUser(${user.id}, '${user.role}')" class="btn btn-danger">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>`;
+                    const row = `
+                        <tr>
+                            <td>${user.agentName}</td>
+                            <td>${user.role}</td>
+                            <td>
+                                <button onclick="editUser(${user.id}, '${user.agentName}', '${user.password}', '${user.role}')" class="btn btn-success mx-md-4">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="removeUser(${user.id}, '${user.role}')" class="btn btn-danger">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
                     userTableBody.innerHTML += row;
                 });
-            })
-            .catch(error => console.error('❌ Fetch Error:', error));
+            });
     }
-    
-    
+
     // Edit user
-    window.editUser = function editUser(userId, currentAgentName, currentPassword, currentRole) {
+    window.editUser = async function editUser(userId, currentAgentName, currentPassword, currentRole) {
         const newAgentName = prompt('Enter new agent name:', currentAgentName);
         const newPassword = prompt('Enter new password:', currentPassword);
         const newRole = prompt('Enter new role (user/admin):', currentRole);
-
+    
         if (newAgentName && newPassword && newRole) {
             const requestData = {
                 userId: userId,
@@ -157,51 +149,63 @@ document.addEventListener('DOMContentLoaded', function() {
                 password: newPassword,
                 role: newRole
             };
-
-            fetch('http://localhost/amsMedical/backend/editUser.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.success) {
-                    loadUserList(); // ✅ Reload user list after successful edit
-                }
-            })
-            .catch(error => console.error('❌ Fetch Error:', error));
-        }
-    }
     
-
+            // Update the database
+            const data = await fetchData('http://localhost/amsMedical/backend/editUser.php', 'POST', requestData);
+            alert(data.message);
+    
+            if (data.success) {
+                // Update the local storage
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userIndex = users.findIndex(user => user.agentName === currentAgentName);
+    
+                if (userIndex !== -1) {
+                    users[userIndex].agentName = newAgentName;
+                    users[userIndex].password = newPassword;
+                    users[userIndex].role = newRole;
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+    
+                loadUserList(); // Reload the user list
+            }
+        }
+    };
     // Remove user
-    window.removeUser = function removeUser(userId, userRole) {
+    window.removeUser = function (userId, userRole) {
         if (userRole === 'admin') {
             alert("Admin user cannot be deleted.");
             return;
         }
 
         if (confirm("Are you sure you want to remove this user?")) {
-            fetch('http://localhost/amsMedical/backend/removeUser.php', {
-                method: 'POST',
+            fetchData('http://localhost/amsMedical/backend/removeUser.php', 'POST', { userId })
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) loadUserList(); // Reload after deletion
+                });
+        }
+    };
+
+    // Reusable fetch function
+    async function fetchData(url, method, data = {}) {
+        try {
+            const response = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: userId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.success) {
-                    loadUserList(); // ✅ Reload after deletion
-                }
-            })
-            .catch(error => console.error('❌ Fetch Error:', error));
+                body: method !== 'GET' ? JSON.stringify(data) : null
+            });
+            if (!response.ok) throw new Error('Network response was not ok');
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Fetch Error:', error);
+            alert('An error occurred. Please try again.');
+            return { success: false, message: 'An error occurred.' };
         }
     }
-    
 });
- // Toggle password visibility function
- function togglePasswordVisibility(passwordId, toggleIconId) {
+
+// Toggle password visibility
+function togglePasswordVisibility(passwordId, toggleIconId) {
     const passwordField = document.getElementById(passwordId);
     const toggleIcon = document.getElementById(toggleIconId);
     const type = passwordField.type === "password" ? "text" : "password";

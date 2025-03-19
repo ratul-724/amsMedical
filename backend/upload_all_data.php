@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-include 'db_config.php'; // Ensure your database connection is set up correctly
+include 'db_config.php'; // Include your database configuration
 
 $response = ['status' => 'error', 'message' => 'Failed to upload data'];
 
@@ -24,10 +24,11 @@ try {
 
     while ($row = $result->fetch_assoc()) {
         // Insert data into medical_data table
-        $stmtInsert = $conn->prepare("INSERT INTO medical_data 
+        $stmtInsert = $conn->prepare("
+            INSERT INTO medical_data 
             (medical_name, date, id, name, passport, agent, physical, radiology, laboratory, remarks, agent_rate) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
         $stmtInsert->bind_param("sssssssssss", 
             $row['medical_name'], 
             $row['date'], 

@@ -5,17 +5,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'user.html';
         return;
     }
-
+    
     const dataPageTopBtns = document.getElementById('dataPageTopBtns');
-    // Check if the user is an admin
     if (loggedInUser.role === 'admin') {
-        // Show the section for admin users
-        dataPageTopBtns.style.display = 'flex' ;
+        dataPageTopBtns.style.display = 'flex';
+        dataPageTopBtns.style.flexWrap = 'nowrap';
     } else {
-        // Hide the section for non-admin users
         dataPageTopBtns.style.display = 'none';
     }
-
 
     const elements = {
         dataDisplay: document.getElementById('dataDisplay'),
@@ -23,30 +20,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         allReportsButton: document.getElementById('allReports'),
         submittedReportsButton: document.getElementById('submittedReports'),
         uploadDataButton: document.getElementById('uploadData'),
-        clearPageButton: document.getElementById('clearPage')
+        clearPageButton: document.getElementById('clearPage'),
+        loadingSpinner: document.getElementById('loadingSpinner')
     };
-
+    
     const fetchData = async (url, body) => {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        const text = await response.text();
+        if (elements.loadingSpinner) {
+            elements.loadingSpinner.style.display = 'block'; // Show loading spinner
+        }
         try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const text = await response.text();
             return JSON.parse(text);
         } catch (error) {
-            console.error('JSON Parse Error:', error);
+            console.error('Fetch Error:', error);
+            alert('An error occurred while fetching data.');
             return null;
+        } finally {
+            if (elements.loadingSpinner) {
+                elements.loadingSpinner.style.display = 'none'; // Hide loading spinner
+            }
         }
     };
-
     const renderTable = (data, isUploaded = false) => {
         const displayElement = isUploaded ? elements.allDataDisplay : elements.dataDisplay;
         displayElement.innerHTML = ''; // Clear previous content
         if (data.length > 0) {
             const table = createTable(data, loggedInUser.role === 'admin');
-            displayElement.appendChild(table); // Append table to the DOM
+            displayElement.appendChild(table);
         } else {
             displayElement.innerHTML = '<p>No data available.</p>';
         }
@@ -84,50 +89,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createTableCell = (content, key) => {
         const td = document.createElement('td');
-    
-        // Convert content to uppercase for specific columns
         if (['physical', 'radiology', 'laboratory', 'remarks'].includes(key)) {
             content = content.toUpperCase();
         }
-    
         td.textContent = content || '';
-    
-        // Apply red background if the value is "UNFIT"
         if (['physical', 'radiology', 'laboratory', 'remarks'].includes(key) && content === 'UNFIT') {
             td.style.backgroundColor = 'red';
-            td.style.color = 'white'; // Optional: Ensure text is readable
+            td.style.color = 'white';
         }
-    
         return td;
     };
-    
+
     const createTableRow = (rowData, isAdmin) => {
         const row = document.createElement('tr');
-        row.setAttribute('data-id', rowData.id); // Add unique ID to the row
-    
-        // Check if any of the specified columns has the value "UNFIT"
+        row.setAttribute('data-id', rowData.id);
         const isUnfit = ['physical', 'radiology', 'laboratory', 'remarks'].some(
             key => rowData[key]?.toUpperCase() === 'UNFIT'
         );
-    
-        // Apply red background to the entire row if "UNFIT" is found
         if (isUnfit) {
             row.style.backgroundColor = 'red';
-            row.style.color = 'white'; // Optional: Ensure text is readable
+            row.style.color = 'white';
         }
-    
-        // Create and append table cells
         Object.keys(rowData).forEach(key => {
-            const cell = createTableCell(rowData[key], key); // Pass the key to createTableCell
+            const cell = createTableCell(rowData[key], key);
             row.appendChild(cell);
         });
-    
-        // Append action buttons for admin
         if (isAdmin) {
             const actionCell = createActionCell(rowData);
             row.appendChild(actionCell);
         }
-    
         return row;
     };
 
@@ -142,13 +132,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createUploadButton = (rowData) => {
         const button = document.createElement('button');
         button.classList.add('btn', 'btn-sm', 'me-1');
-    
-        // Hide upload button in "All Reports" section
         if (elements.allDataDisplay.style.display === 'block') {
-            return document.createElement('span'); // Return an empty span instead of a button
+            return document.createElement('span');
         }
-    
-        // Check if data is already uploaded
         fetchData('http://localhost/amsMedical/backend/check_data.php', rowData)
             .then(response => {
                 if (response?.exists) {
@@ -162,7 +148,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             })
             .catch(error => console.error('Error checking data:', error));
-    
         return button;
     };
 
@@ -184,23 +169,46 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const handleUpload = async (rowData) => {
         if (confirm('Are you sure you want to upload this report?')) {
-            const response = await fetchData('http://localhost/amsMedical/backend/upload_data.php', [rowData]);
+            const response = await fetchData('http://localhost/amsMedical/backend/upload_single_data.php', { rowId: rowData.id });
             if (response?.status === 'success') {
-                fetchDataAndRender();
+                // alert(response.message);
+                fetchDataAndRender(); // Reload the data
+            } else {
+                alert(response?.message || 'Upload failed.');
+            }
+        }
+    };  
+    
+    const handleBulkUpload = async () => {
+        if (confirm('Are you sure you want to upload all unique data?')) {
+            const response = await fetchData('http://localhost/amsMedical/backend/upload_all_data.php', {});
+            if (response?.status === 'success') {
+                alert(response.message);
+                fetchDataAndRender(); // Reload the data
             } else {
                 alert(response?.message || 'Upload failed.');
             }
         }
     };
-
+    
+    // Attach event listeners
+    elements.uploadDataButton.addEventListener('click', handleBulkUpload);
+    
+    // Attach event listeners to row-wise upload buttons
+    document.querySelectorAll('.uploadRowButton').forEach(button => {
+        button.addEventListener('click', () => {
+            const rowId = button.getAttribute('data-id');
+            const rowData = { id: rowId }; // Replace this with actual row data
+            handleUpload(rowData);
+        });
+    });
+    
     const handleEdit = (rowData) => {
         const row = event.target.closest('tr');
         const cells = row.querySelectorAll('td');
         const originalData = { ...rowData };
-
-        // Convert cells to input fields
         cells.forEach((cell, index) => {
-            if (index < cells.length - 1) { // Skip the actions cell
+            if (index < cells.length - 1) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = cell.textContent;
@@ -208,8 +216,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cell.appendChild(input);
             }
         });
-
-        // Create Save and Cancel buttons
         const saveButton = document.createElement('button');
         saveButton.innerHTML = '<i class="fa-solid fa-floppy-disk" title="Save"></i>';
         saveButton.classList.add('btn', 'btn-success', 'btn-sm', 'me-1');
@@ -220,7 +226,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         cancelButton.classList.add('btn', 'btn-danger', 'btn-sm');
         cancelButton.addEventListener('click', () => handleCancel(row, originalData));
 
-        // Replace Edit button with Save and Cancel buttons
         const actionCell = cells[cells.length - 1];
         actionCell.innerHTML = '';
         actionCell.appendChild(saveButton);
@@ -228,18 +233,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const handleSave = async (row, originalData) => {
-        const rowId = row.getAttribute('data-id'); // Ensure correct row ID
+        const rowId = row.getAttribute('data-id');
         if (!rowId) {
             alert("Error: Row ID is missing!");
             return;
         }
-    
         const cells = row.querySelectorAll('td');
-        const updatedData = { ...originalData, id: rowId }; // Ensure ID is correct
-    
-        // Collect updated values from input fields
+        const updatedData = { ...originalData, id: rowId };
         cells.forEach((cell, index) => {
-            if (index < cells.length - 1) { // Skip the actions cell
+            if (index < cells.length - 1) {
                 const key = Object.keys(originalData)[index];
                 const input = cell.querySelector('input');
                 if (input) {
@@ -247,37 +249,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         });
-    
-        console.log("📌 Sending Updated Data:", JSON.stringify(updatedData)); // Debugging
-    
-        // Determine which endpoint to use based on the current view
         const isAllReportsView = elements.allDataDisplay.style.display === 'block';
         const endpoint = isAllReportsView ? 'http://localhost/amsMedical/backend/updateMedicalData.php' : 'http://localhost/amsMedical/backend/updateData.php';
-    
         const response = await fetchData(endpoint, updatedData);
-        console.log("📌 Server Response:", response); // Debugging
-    
         if (response?.status === 'success') {
             if (isAllReportsView) {
-                fetchUploadedDataAndRender(); // Reload all reports
+                fetchUploadedDataAndRender();
             } else {
-                fetchDataAndRender(); // Reload submitted reports
+                fetchDataAndRender();
             }
         } else {
             alert(response?.message || '❌ Update failed.');
         }
     };
 
-
     const handleCancel = (row, originalData) => {
         const cells = row.querySelectorAll('td');
         cells.forEach((cell, index) => {
-            if (index < cells.length - 1) { // Skip the actions cell
+            if (index < cells.length - 1) {
                 cell.textContent = originalData[Object.keys(originalData)[index]];
             }
         });
-
-        // Restore Edit and Delete buttons
         const actionCell = cells[cells.length - 1];
         actionCell.innerHTML = '';
         actionCell.appendChild(createUploadButton(originalData));
@@ -285,18 +277,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         actionCell.appendChild(createDeleteButton(originalData));
     };
 
-
     const handleDelete = async (id) => {
         if (confirm('Are you sure you want to delete this report?')) {
             const isAllReportsView = elements.allDataDisplay.style.display === 'block';
             const section = isAllReportsView ? 'all_reports' : 'submitted';
-    
             const response = await fetchData('http://localhost/amsMedical/backend/deleteData.php', { id, section });
             if (response?.status === 'success') {
                 if (isAllReportsView) {
-                    fetchUploadedDataAndRender(); // Reload all reports
+                    fetchUploadedDataAndRender();
                 } else {
-                    fetchDataAndRender(); // Reload submitted reports
+                    fetchDataAndRender();
                 }
             } else {
                 alert(response?.message || 'Deletion failed.');
@@ -322,9 +312,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.dataDisplay.style.display = showAllReports ? 'none' : 'block';
         elements.allDataDisplay.style.display = showAllReports ? 'block' : 'none';
         document.getElementById('dataPageTopTitle').innerHTML = showAllReports ? 'All Reports :' : 'Submitted Reports :';
-
         const downloadContainer = document.getElementById('downloadContainer');
-    downloadContainer.style.display = showAllReports ? 'block' : 'none';
+        downloadContainer.style.display = showAllReports ? 'block' : 'none'; 
     };
 
     elements.allReportsButton.addEventListener('click', () => {
@@ -345,19 +334,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 fetchDataAndRender();
             } else {
                 alert(response?.message || 'Failed to clear reports.');
-            }
-        }
-    });
-
-    elements.uploadDataButton.addEventListener('click', async () => {
-        if (confirm('Are you sure you want to upload all unique data to the medical_data table?')) {
-            const response = await fetchData('http://localhost/amsMedical/backend/upload_data.php', {});
-            if (response?.status === 'success') {
-                alert(response.message);
-                fetchDataAndRender(); // Reload the submitted data section
-                // fetchUploadedDataAndRender();
-            } else {
-                alert(response?.message || 'Upload failed.');
             }
         }
     });
