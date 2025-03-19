@@ -6,8 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Array.isArray(formDataArray)) {
         formDataArray = [];
     }
-    const userIcon = document.querySelector('.user-icon img'); // Select the <img> element inside .user-icon
-
     if (!form) return; // Prevent errors if form is missing
 
     const fetchAllIds = () => {
