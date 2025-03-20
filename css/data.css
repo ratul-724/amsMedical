@@ -75,3 +75,11 @@ th:last-child, td:last-child {
         padding: 5px;
     }
 }
+
+/* Dark Mode Styles for .dataPageTop Section */
+body.dark-mode .dataPageTop {
+    background:  #282828 !important; 
+}
+body.dark-mode .dataPageTop h2#dataPageTopTitle {
+    color: #ffffff !important;
+}

@@ -1,11 +1,12 @@
+/* General Styles */
 main {
     margin-left: 60px;
     position: relative;
-    z-index: 1; 
-    min-height: calc(100vh - 76px); 
+    z-index: 1;
+    min-height: calc(100vh - 76px);
     width: 100%;
 }
-#home{
+#home {
     margin-bottom: 100px;
 }
 .topBanner {
@@ -17,25 +18,31 @@ main {
     width: 100%;
     height: 100%;
 }
+select {
+    width: 100%; 
+    padding: 0.5rem; 
+    font-size: 1rem;
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    background-color: #fff; 
+    color: #333; 
+    cursor: pointer;
+    border-color: #000000 !important;
+}
 
-/* Add responsive styles */
+/* Responsive Styles */
 @media (max-width: 768px) {
     .topBanner {
         height: 150px;
     }
-
     .topBanner .text h1 {
         font-size: 1.8rem;
     }
-
     .topBanner .text p {
         font-size: 1rem;
     }
 }
-
-
-/* user page css start here  */
-/* ...password hide show... */
+/* User Page Styles */
 .password-container {
     position: relative;
     display: inline-block;
@@ -50,42 +57,119 @@ main {
     transform: translateY(-50%);
     cursor: pointer;
 }
-/* ...password hide show... */
-
-#loginAndRegister{
+#loginAndRegister {
     justify-content: center;
     font-size: 13px;
 }
-#loginAndRegister form{
+#loginAndRegister form {
     background-color: #d5f3b8;
     padding: 30px;
     border-radius: 10px;
 }
-#loginAndRegister .signInBtn{
+#loginAndRegister .signInBtn {
     width: 100%;
 }
-#register{
+#register {
     display: none;
 }
-#userList{
+#userList {
     display: none;
     width: 80%;
     margin: auto;
 }
+#userList td {
+    border-color: #444;
+}
+
 @media (max-width: 768px) {
-    #loginAndRegister{
+    #loginAndRegister {
         width: 100%;
         display: flex;
         justify-content: center;
         font-size: 13px;
         flex-direction: column;
     }
-    #loginAndRegister form{
+    #loginAndRegister form {
         background-color: #d5f3b8;
         border-radius: 10px;
         width: 100%;
     }
-    #register{
+    #register {
         margin-top: 70px;
     }
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+body.dark-mode main {
+    background: linear-gradient(to bottom right, #4e5051, #49494d);
+}
+body.dark-mode .topBanner img {
+    filter: brightness(0.8); /* Adjust banner brightness for dark mode */
+}
+body.dark-mode .card {
+    background-color: #333 !important;
+    color: #ffffff;
+    border-color: #444;
+}
+body.dark-mode .form-label {
+    color: #ffffff; 
+}
+body.dark-mode select {
+    background-color: #333; 
+    color: #ffffff; 
+    border-color: #444; 
+}
+body.dark-mode .medicalText {
+    color: #ffffff;
+}
+body.dark-mode .form-control {
+    background-color: #3f3d3d;
+    color: #ffffff;
+    border-color: #444;
+}
+body.dark-mode .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+body.dark-mode .header-icons .btn-dark {
+    background-color: #333;
+    border-color: #444;
+}
+body.dark-mode .sidebar {
+    background-color: #383737;
+    color: #ffffff;
+}
+body.dark-mode .menu-item {
+    color: #ffffff;
+}
+body.dark-mode .menu-item:hover {
+    background-color: #333;
+}
+
+/* login register area  */
+body.dark-mode #loginAndRegister form {
+    background-color: #333;
+    color: #ffffff;
+}
+body.dark-mode .password-container input {
+    background-color: #333;
+    color: #ffffff;
+    border-color: #444;
+}
+body.dark-mode .password-container i {
+    color: #ffffff;
+}
+body.dark-mode .userTitleText{
+    color: #ffffff !important;
+}
+body.dark-mode #userList {
+    background: #333 !important;
+}
+body.dark-mode #userList th,
+body.dark-mode #userList td {
+    border-color: #444;
 }

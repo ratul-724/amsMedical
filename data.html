@@ -27,7 +27,11 @@
         <div class="logo"><a href="index.html"><img src="media/logo.png" alt="logo" height="70px"></a></div>
         <h3 class="fw-semibold text-info-emphasis text-center ">Welcome  <span  id="welcomeName" class="fw-bold"> </span>!</h3>
         <div class="header-icons">
-            <div ><a href="user.html"><img src="media/icons/user.png" alt="user" height="40px" class="user-icon"  id="userIcon" style="border-radius: 50%;"></a></div>
+            <div ><a href="user.html"><img src="media/icons/user.png" alt="user" height="40px" class="userIcon"  id="userIcon" style="border-radius: 50%;"></a></div>
+            <!-- Dark Mode Toggle Button -->
+            <button id="darkModeToggle" class="btn btn-dark">
+                <i class="fas fa-moon"></i> <!-- Moon icon for dark mode -->
+            </button>
         </div>
     </header>
     <div class="fullBody">
@@ -53,9 +57,9 @@
         <main>
             
             <div id="data" class="ms-5 me-2 ps-4">
-                <div class="dataPageTop p-0 m-0 w-100">
+                <div class="dataPageTop  m-0 w-100">
                     <!-- Inside dataPageTop -->
-                    <div class="justify-content-between align-items-center w-100" style="display: flex !important;">
+                    <div class="justify-content-between align-items-center px-3 w-100" style="display: flex !important;">
                         <h2 class="text-black-50 fw-semibold mt-3 " id="dataPageTopTitle">Submitted Reports :</h2>
                         <div class=" justify-content-end mt-3" id="dataPageTopBtns">
                             <button id="allReports" class="btn btn-primary mx-lg-2">All Reports</button>
@@ -73,7 +77,7 @@
                             
                         </div>
                     </div>
-                    <hr class="border-black border-2">
+                    <hr style="border: 2px solid rgb(131, 128, 128); width: 100%;">
                 </div>
                 
                 <div id="dataDisplay" class="dataView"></div>
