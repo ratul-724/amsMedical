@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     };
+    
     const renderTable = (data, isUploaded = false) => {
         const displayElement = isUploaded ? elements.allDataDisplay : elements.dataDisplay;
         displayElement.innerHTML = ''; // Clear previous content

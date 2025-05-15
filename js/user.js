@@ -123,10 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             <td>${user.agentName}</td>
                             <td>${user.role}</td>
                             <td>
-                                <button onclick="editUser(${user.id}, '${user.agentName}', '${user.password}', '${user.role}')" class="btn btn-success mx-md-4">
+                                <button onclick="editUser(${user.id}, '${user.agentName}', '${user.password}', '${user.role}')" class="btn btn-success mx-md-4 rounded-circle">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <button onclick="removeUser(${user.id}, '${user.role}')" class="btn btn-danger">
+                                <button onclick="removeUser(${user.id}, '${user.role}')" class="btn btn-danger rounded-circle">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </td>
