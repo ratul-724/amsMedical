@@ -1,69 +1,84 @@
 <?php
-header('Content-Type: application/json');
-include 'db_config.php'; // Include your database configuration
+// Ensure no output before headers
+ob_start();
 
-$response = ['status' => 'error', 'message' => 'Failed to upload data'];
+// Set proper headers FIRST
+header('Content-Type: application/json');
+
+// Enable error reporting (remove in production)
+error_reporting(0); // Turn off in production
+ini_set('display_errors', 0); // Turn off in production
+
+require_once 'db_config.php';
+$response = ['status' => 'error', 'message' => '', 'uploaded' => 0];
 
 try {
-    $conn->begin_transaction(); // Start transaction for bulk upload
-
-    // Fetch unique data from temporary_medical_data that doesn't exist in medical_data
-    $query = "
-        SELECT t.* 
-        FROM temporary_medical_data t
-        LEFT JOIN medical_data m ON t.id = m.id
-        WHERE m.id IS NULL
-    ";
-    $result = $conn->query($query);
-
-    if (!$result) {
-        throw new Exception("Error fetching unique data: " . $conn->error);
+    // Check if there's data to process
+    $checkQuery = "SELECT COUNT(*) AS count FROM temporary_medical_data";
+    $checkResult = $conn->query($checkQuery);
+    $row = $checkResult->fetch_assoc();
+    
+    if ($row['count'] == 0) {
+        throw new Exception("No data available to upload");
     }
 
-    $uploadedCount = 0; // Counter to track successful inserts
+    $conn->begin_transaction();
 
-    while ($row = $result->fetch_assoc()) {
-        // Insert data into medical_data table
-        $stmtInsert = $conn->prepare("
-            INSERT INTO medical_data 
-            (medical_name, date, id, name, passport, agent, physical, radiology, laboratory, remarks, agent_rate) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmtInsert->bind_param("sssssssssss", 
-            $row['medical_name'], 
-            $row['date'], 
-            $row['id'], 
-            $row['name'], 
-            $row['passport'], 
-            $row['agent'], 
-            $row['physical'], 
-            $row['radiology'], 
-            $row['laboratory'], 
-            $row['remarks'], 
-            $row['agent_rate']
+    // Get unique records not in medical_data
+    $selectQuery = "SELECT t.* FROM temporary_medical_data t
+                   LEFT JOIN medical_data m ON t.id = m.id
+                   WHERE m.id IS NULL";
+    
+    $sourceData = $conn->query($selectQuery);
+    if (!$sourceData) {
+        throw new Exception("Failed to fetch data: " . $conn->error);
+    }
+
+    $insertQuery = "INSERT INTO medical_data 
+                   (medical_name, date, id, name, passport, agent, laboratory, remarks)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    
+    $stmt = $conn->prepare($insertQuery);
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
+    }
+
+    $uploadedCount = 0;
+    while ($row = $sourceData->fetch_assoc()) {
+        $stmt->bind_param(
+            "ssssssss",
+            $row['medical_name'],
+            $row['date'],
+            $row['id'],
+            $row['name'],
+            $row['passport'],
+            $row['agent'],
+            $row['laboratory'],
+            $row['remarks']
         );
 
-        if ($stmtInsert->execute()) {
-            $uploadedCount++; // Track successful uploads
-        } else {
-            throw new Exception("Error inserting record: " . $stmtInsert->error);
+        if (!$stmt->execute()) {
+            throw new Exception("Insert failed: " . $stmt->error);
         }
-
-        $stmtInsert->close();
+        $uploadedCount++;
     }
 
-    if ($uploadedCount > 0) {
-        $conn->commit(); // Commit only if at least one row was uploaded
-        $response = ['status' => 'success', 'message' => "$uploadedCount record(s) uploaded successfully"];
-    } else {
-        $conn->rollback(); // Rollback if no new data was uploaded
-        $response['message'] = 'No new records uploaded';
-    }
+    // Removed the DELETE query that was clearing temporary data
+    $conn->commit();
+    
+    $response = [
+        'status' => 'success',
+        'message' => "$uploadedCount records uploaded successfully",
+        'uploaded' => $uploadedCount,
+        'temporary_records_remaining' => $row['count'] // Show original count
+    ];
+
 } catch (Exception $e) {
-    $conn->rollback(); // Rollback transaction if any error occurs
-    $response['message'] = 'Error uploading data: ' . $e->getMessage();
+    $conn->rollback();
+    $response['message'] = $e->getMessage();
+} finally {
+    if (isset($stmt)) $stmt->close();
+    $conn->close();
+    echo json_encode($response);
 }
-
-$conn->close();
-echo json_encode($response);
 ?>

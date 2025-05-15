@@ -1,4 +1,5 @@
 <?php
+// header("Access-Control-Allow-Origin: *");
 header('Content-Type: application/json');
 include 'db_config.php'; // Include your database configuration
 
@@ -30,21 +31,18 @@ try {
     // Insert the row into medical_data
     $stmtInsert = $conn->prepare("
         INSERT INTO medical_data 
-        (medical_name, date, id, name, passport, agent, physical, radiology, laboratory, remarks, agent_rate) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (medical_name, date, id, name, passport, agent, laboratory, remarks) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmtInsert->bind_param("sssssssssss", 
+    $stmtInsert->bind_param("ssssssss", 
         $row['medical_name'], 
         $row['date'], 
         $row['id'], 
         $row['name'], 
         $row['passport'], 
         $row['agent'], 
-        $row['physical'], 
-        $row['radiology'], 
         $row['laboratory'], 
         $row['remarks'], 
-        $row['agent_rate']
     );
 
     if ($stmtInsert->execute()) {

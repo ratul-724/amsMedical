@@ -1,4 +1,5 @@
 <?php
+// header("Access-Control-Allow-Origin: *");
 header('Content-Type: application/json');
 include 'db_config.php';
 
@@ -6,7 +7,7 @@ include 'db_config.php';
 $input = json_decode(file_get_contents("php://input"), true);
 
 // Validate input
-if (!isset($input['medical_name'], $input['date'], $input['id'], $input['name'], $input['passport'], $input['agent'], $input['physical'], $input['radiology'], $input['laboratory'], $input['remarks'], $input['agent_rate'])) {
+if (!isset($input['medical_name'], $input['date'], $input['id'], $input['name'], $input['passport'], $input['agent'], $input['laboratory'], $input['remarks'])) {
     echo json_encode(["success" => false, "message" => "Invalid input data."]);
     exit;
 }
@@ -17,15 +18,12 @@ $id = $input['id'];
 $name = $input['name'];
 $passport = $input['passport'];
 $agent = $input['agent'];
-$physical = $input['physical'];
-$radiology = $input['radiology'];
 $laboratory = $input['laboratory'];
 $remarks = $input['remarks'];
-$agent_rate = $input['agent_rate'];
 
 // Prepare SQL query
-$stmt = $conn->prepare("INSERT INTO temporary_medical_data (medical_name, date, id, name, passport, agent, physical, radiology, laboratory, remarks, agent_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("sssssssssss", $medical_name, $date, $id, $name, $passport, $agent, $physical, $radiology, $laboratory, $remarks, $agent_rate);
+$stmt = $conn->prepare("INSERT INTO temporary_medical_data (medical_name, date, id, name, passport, agent, laboratory, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("ssssssss", $medical_name, $date, $id, $name, $passport, $agent, $laboratory, $remarks);
 
 // Execute the query
 if ($stmt->execute()) {

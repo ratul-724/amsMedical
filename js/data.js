@@ -24,29 +24,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadingSpinner: document.getElementById('loadingSpinner')
     };
     
-    const fetchData = async (url, body) => {
-        if (elements.loadingSpinner) {
-            elements.loadingSpinner.style.display = 'block'; // Show loading spinner
-        }
+   const API_BASE_URL = 'http://localhost/amsMedical/backend/';
+
+    const fetchData = async (endpoint, body) => {
         try {
-            const response = await fetch(url, {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token') || ''
+                },
                 body: JSON.stringify(body)
             });
-            const text = await response.text();
-            return JSON.parse(text);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
         } catch (error) {
             console.error('Fetch Error:', error);
-            alert('An error occurred while fetching data.');
+            alert(error.message, 'error');
             return null;
-        } finally {
-            if (elements.loadingSpinner) {
-                elements.loadingSpinner.style.display = 'none'; // Hide loading spinner
-            }
         }
     };
-    
+
+
     const renderTable = (data, isUploaded = false) => {
         const displayElement = isUploaded ? elements.allDataDisplay : elements.dataDisplay;
         displayElement.innerHTML = ''; // Clear previous content
@@ -67,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const createTableHeader = (isAdmin) => {
-        const headers = ['medical_name', 'date', 'id', 'name', 'passport', 'agent', 'physical', 'radiology', 'laboratory', 'remarks', 'agent_rate'];
+        const headers = ['medical_name', 'date', 'id', 'name', 'passport', 'agent', 'status', 'remarks'];
         const headerRow = document.createElement('tr');
         headers.forEach(header => headerRow.appendChild(createHeaderCell(header)));
         if (isAdmin) headerRow.appendChild(createHeaderCell('Actions'));
@@ -90,11 +93,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createTableCell = (content, key) => {
         const td = document.createElement('td');
-        if (['physical', 'radiology', 'laboratory', 'remarks'].includes(key)) {
+        if (['laboratory', 'remarks'].includes(key)) {
             content = content.toUpperCase();
         }
         td.textContent = content || '';
-        if (['physical', 'radiology', 'laboratory', 'remarks'].includes(key) && content === 'UNFIT') {
+        if (['laboratory', 'remarks'].includes(key) && content === 'UNFIT') {
             td.style.backgroundColor = 'red';
             td.style.color = 'white';
         }
@@ -104,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createTableRow = (rowData, isAdmin) => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', rowData.id);
-        const isUnfit = ['physical', 'radiology', 'laboratory', 'remarks'].some(
+        const isUnfit = ['laboratory', 'remarks'].some(
             key => rowData[key]?.toUpperCase() === 'UNFIT'
         );
         if (isUnfit) {
@@ -136,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (elements.allDataDisplay.style.display === 'block') {
             return document.createElement('span');
         }
-        fetchData('http://localhost/amsMedical/backend/check_data.php', rowData)
+        fetchData('check_data.php', rowData)
             .then(response => {
                 if (response?.exists) {
                     button.innerHTML = '<i class="fa-solid fa-check" title="Already Uploaded"></i>';
@@ -170,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const handleUpload = async (rowData) => {
         if (confirm('Are you sure you want to upload this report?')) {
-            const response = await fetchData('http://localhost/amsMedical/backend/upload_single_data.php', { rowId: rowData.id });
+            const response = await fetchData('upload_single_data.php', { rowId: rowData.id });
             if (response?.status === 'success') {
                 // alert(response.message);
                 fetchDataAndRender(); // Reload the data
@@ -181,17 +184,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     };  
     
     const handleBulkUpload = async () => {
-        if (confirm('Are you sure you want to upload all unique data?')) {
-            const response = await fetchData('http://localhost/amsMedical/backend/upload_all_data.php', {});
+    if (confirm('Are you sure you want to upload all unique data?')) {
+        try {
+            elements.loadingSpinner.style.display = 'block';
+            const response = await fetchData('upload_all_data.php', {});
             if (response?.status === 'success') {
-                alert(response.message);
-                fetchDataAndRender(); // Reload the data
+                alert(response.message, 'success');
+                fetchDataAndRender();
             } else {
-                alert(response?.message || 'Upload failed.');
+                alert(response?.message || 'Upload failed', 'error');
             }
+        } catch (error) {
+            alert(error.message, 'error');
+        } finally {
+            elements.loadingSpinner.style.display = 'none';
         }
-    };
-    
+    }
+};
+
+
     // Attach event listeners
     elements.uploadDataButton.addEventListener('click', handleBulkUpload);
     
@@ -251,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         const isAllReportsView = elements.allDataDisplay.style.display === 'block';
-        const endpoint = isAllReportsView ? 'http://localhost/amsMedical/backend/updateMedicalData.php' : 'http://localhost/amsMedical/backend/updateData.php';
+        const endpoint = isAllReportsView ? 'updateMedicalData.php' : 'updateData.php';
         const response = await fetchData(endpoint, updatedData);
         if (response?.status === 'success') {
             if (isAllReportsView) {
@@ -282,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (confirm('Are you sure you want to delete this report?')) {
             const isAllReportsView = elements.allDataDisplay.style.display === 'block';
             const section = isAllReportsView ? 'all_reports' : 'submitted';
-            const response = await fetchData('http://localhost/amsMedical/backend/deleteData.php', { id, section });
+            const response = await fetchData('deleteData.php', { id, section });
             if (response?.status === 'success') {
                 if (isAllReportsView) {
                     fetchUploadedDataAndRender();
@@ -296,12 +307,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const fetchDataAndRender = async () => {
-        const data = await fetchData('http://localhost/amsMedical/backend/getSubmittedData.php', loggedInUser);
+        const data = await fetchData('getSubmittedData.php', loggedInUser);
         if (data) renderTable(data);
     };
 
     const fetchUploadedDataAndRender = async () => {
-        const data = await fetchData('http://localhost/amsMedical/backend/getUploadedData.php', loggedInUser);
+        const data = await fetchData('getUploadedData.php', loggedInUser);
         if (data) renderTable(data, true);
     };
 
@@ -329,7 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     elements.clearPageButton.addEventListener('click', async () => {
         if (confirm('Are you sure you want to remove all reports?')) {
-            const response = await fetchData('http://localhost/amsMedical/backend/clearPage.php', {});
+            const response = await fetchData('clearPage.php', {});
             if (response?.status === 'success') {
                 alert('All reports have been removed.');
                 fetchDataAndRender();

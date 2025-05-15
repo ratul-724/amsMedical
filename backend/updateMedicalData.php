@@ -1,4 +1,5 @@
 <?php
+// header("Access-Control-Allow-Origin: *");
 header('Content-Type: application/json'); // Ensure the response is JSON
 include 'db_config.php'; // Include your database configuration
 
@@ -17,11 +18,8 @@ try {
     $name = $data['name'];
     $passport = $data['passport'];
     $agent = $data['agent'];
-    $physical = $data['physical'];
-    $radiology = $data['radiology'];
     $laboratory = $data['laboratory'];
     $remarks = $data['remarks'];
-    $agent_rate = $data['agent_rate'];
 
     // Prepare SQL statement
     $sql = "UPDATE medical_data SET 
@@ -30,11 +28,8 @@ try {
             name = ?, 
             passport = ?, 
             agent = ?, 
-            physical = ?, 
-            radiology = ?, 
             laboratory = ?, 
             remarks = ?, 
-            agent_rate = ? 
             WHERE id = ?";
     $stmt = $conn->prepare($sql);
 
@@ -44,17 +39,14 @@ try {
 
     // Bind parameters
     $stmt->bind_param(
-        "sssssssssss", // 11 placeholders: 10 strings + 1 string for the ID
+        "ssssssss", // 11 placeholders: 10 strings + 1 string for the ID
         $medical_name, 
         $date, 
         $name, 
         $passport, 
         $agent, 
-        $physical, 
-        $radiology, 
         $laboratory, 
         $remarks, 
-        $agent_rate, 
         $id // ID for the WHERE clause
     );
 

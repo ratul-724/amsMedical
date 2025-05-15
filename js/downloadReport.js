@@ -75,8 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.text('All Reports', 14, 10);
     
             const tableData = data.map(item => [
-                item.medical_name, item.date, item.id, item.name, item.passport, item.agent,
-                item.physical, item.radiology, item.laboratory, item.remarks, item.agent_rate
+                item.medical_name, item.date, item.id, item.name, item.passport, item.agent, item.laboratory, item.remarks
             ]);
     
             if (typeof doc.autoTable === "undefined") {
@@ -87,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 📌 Reduce side margins (left & right)
             doc.autoTable({
                 startY: 15, 
-                head: [['Medical Name', 'Date', 'ID', 'Name', 'Passport', 'Agent', 'Physical', 'Radiology', 'Laboratory', 'Remarks', 'Agent Rate']],
+                head: [['Medical Name', 'Date', 'ID', 'Name', 'Passport', 'Agent', 'Status', 'Remarks']],
                 body: tableData,
                 styles: { 
                     fontSize: 10,    // Smaller font size
