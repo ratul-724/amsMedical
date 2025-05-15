@@ -1,7 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('medical_name_select');
+    const container = document.getElementById('custom_medical_name_container');
+    const customInput = document.getElementById('medical_name_input');
+    const hiddenInput = document.getElementById('medical_name');
+
+    select.addEventListener('change', function() {
+        if (this.value === 'other') {
+            container.style.display = 'block';
+            hiddenInput.value = ''; // Clear the hidden field
+        } else {
+            container.style.display = 'none';
+            hiddenInput.value = this.value; // Set the selected value
+        }
+    });
+    customInput.addEventListener('input', function() {
+        hiddenInput.value = this.value; // Update hidden field with custom value
+    });
+
+
     const form = document.getElementById('dataForm');
-    const dataEntryForm = document.getElementById('dataEntryForm');
-    let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     let formDataArray = JSON.parse(localStorage.getItem('formDataArray')) || [];
     if (!Array.isArray(formDataArray)) {
         formDataArray = [];
@@ -70,11 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .catch(error => console.error('Error:', error));
     });
   });
-
-    if (loggedInUser && loggedInUser.role !== 'admin' || loggedInUser === null) {
-        dataEntryForm.style.display = 'none';
-        return;
-    }
     
     localStorage.setItem('formDataArray', JSON.stringify(formDataArray));
 });

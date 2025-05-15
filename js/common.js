@@ -18,9 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Change the user icon to an admin-specific image
             const userIcon = document.getElementById('userIcon');
             const userIconSidebar = document.getElementById('userIconSidebar');
+            const reportEntry = document.getElementById('reportEntry');
             userIcon.src = 'media/icons/ali.jpg'; // Path to the admin icon
             userIconSidebar.src = 'media/icons/ali.jpg'; // Path to the admin icon
-            
+            reportEntry.style.display = 'block'; // Show the report entry button
         }
     } 
 });
