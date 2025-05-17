@@ -10,7 +10,7 @@ main {
     margin-bottom: 100px;
 }
 .topBanner {
-    height: 200px;
+    height: 400px;
     margin-bottom: 20px;
     overflow: hidden;
 }
@@ -29,17 +29,18 @@ select {
     cursor: pointer;
     border-color: #000000 !important;
 }
+header .logo img{
+    height: 70px;
+}
 
 /* Responsive Styles */
 @media (max-width: 768px) {
     .topBanner {
         height: 150px;
     }
-    .topBanner .text h1 {
-        font-size: 1.8rem;
-    }
-    .topBanner .text p {
-        font-size: 1rem;
+    header .logo img{
+        height: 60px;
+        padding-top: 15px;
     }
 }
 /* User Page Styles */
